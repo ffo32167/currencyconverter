@@ -3,9 +3,7 @@ package cron
 import "time"
 
 type Cron struct {
-	hour int
-	min  int
-	sec  int
+	date time.Time
 	fn   func()
 }
 
