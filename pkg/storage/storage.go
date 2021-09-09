@@ -12,10 +12,6 @@ type Storage interface {
 	Save(domain.Rate) error
 }
 
-type Config struct {
-	PgConnStr string
-}
-
-func New(c Config) (Storage, error) {
-	return postgres.New(c.PgConnStr), nil
+func NewPg(connectionString string) (*Storage, error) {
+	return postgres.New(connectionString), nil
 }

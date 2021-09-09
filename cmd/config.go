@@ -1,18 +1,13 @@
 package main
 
-import (
-	"github.com/ffo32167/currencyconverter/pkg/server"
-	"github.com/ffo32167/currencyconverter/pkg/storage"
-)
-
 type config struct {
-	StorCfg storage.Config
-	ServCfg server.Config
+	pgConnStr string
+	servPort  string
 }
 
-func newConfig() (*config, error) {
-	return &config{
-		storage.Config{},
-		server.Config{},
+func newConfig() (config, error) {
+	return config{
+		pgConnStr: "asd",
+		servPort:  ":444",
 	}, nil
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/ffo32167/currencyconverter/log"
-	"github.com/ffo32167/currencyconverter/pkg/server"
+	APIServer "github.com/ffo32167/currencyconverter/pkg/APIServer"
 	"github.com/ffo32167/currencyconverter/pkg/storage"
 )
 
@@ -14,10 +14,10 @@ func main() {
 		log.Fatal("cant get config: ", err)
 	}
 
-	storage, err := storage.New(cfg.StorCfg)
+	storage, err := storage.NewPg(cfg.pgConnStr)
 	if err != nil {
 		log.Fatal("cant get storage: ", err)
 	}
-
-	server.Start(storage, log, cfg.ServCfg)
+	server := APIServer.New(storage, log, APIServer.NewConfig(cfg.servPort))
+	server.Start()
 }
