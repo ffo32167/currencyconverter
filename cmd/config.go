@@ -11,3 +11,4 @@ func newConfig() (config, error) {
 		servPort:  ":444",
 	}, nil
 }
+
