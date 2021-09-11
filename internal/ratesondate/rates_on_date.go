@@ -3,9 +3,9 @@ package ratesondate
 import (
 	"time"
 
-	domain "github.com/ffo32167/currencyconverter"
+	"github.com/ffo32167/currencyconverter/rate"
 )
 
 type ratesOnDate interface {
-	RatesOnDate(date time.Time) (domain.Rate, error)
+	RatesOnDate(date time.Time) (rate.Rate, error)
 }
