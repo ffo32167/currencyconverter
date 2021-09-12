@@ -1,20 +1,33 @@
 package postgres
 
-//	domain "github.com/ffo32167/currencyconverter"
+import (
+	"context"
+	"fmt"
+	"time"
 
-type Postgres struct {
-	connectionString string
+	"github.com/jackc/pgx/v4/pgxpool"
+)
+
+type StorageRate struct {
+	RateDate time.Time `json:"date"`
+	CurrCode string    `json:"curr_code"`
+	Rate     float64   `json:"rate"`
 }
 
-func New(connectionString string) *Postgres {
-	return &Postgres{connectionString: connectionString}
+func Rates(pool *pgxpool.Pool, date string) ([]StorageRate, error) {
+	rows, err := pool.Query(context.Background(), "SELECT rate_date,curr_code,rate FROM employee_accounting.rates r WHERE rate_date = $1", date)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to execute query: %w\n", err)
+	}
+	defer rows.Close()
+	var rates []StorageRate
+	var rate StorageRate
+	for rows.Next() {
+		err = rows.Scan(&rate.RateDate, &rate.CurrCode, &rate.Rate)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to scan query: %w\n", err)
+		}
+		rates = append(rates, rate)
+	}
+	return rates, nil
 }
-
-/*
-func (p *Postgres) Load(date time.Time) (domain.Rate, error) {
-	return domain.Rate{Base: "USD", Date: date, Rates: map[string]float64{"RUB": 75.00}}, nil
-}
-func (p *Postgres) Save(domain.Rate) error {
-	return nil
-}
-*/

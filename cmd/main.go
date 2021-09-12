@@ -3,53 +3,26 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"net/http"
+	"os"
 
+	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4/pgxpool"
+
+	"github.com/ffo32167/currencyconverter/internal/APIServer/handlers/rate"
 )
 
 func main() {
-	/*	log := log.New()
-
-		cfg, err := newConfig()
-		if err != nil {
-			log.Fatal("cant get config: ", err)
-		}
-	*/
-
-	type user struct {
-		Id        int
-		FirstName string
-		LastName  string
-	}
-
-	storage, err := pgxpool.Connect(context.Background(), "user=postgres password=qwe123 dbname=postgres sslmode=disable")
+	pool, err := pgxpool.Connect(context.Background(), os.Getenv("PG_CONN_STR"))
 	if err != nil {
-		log.Fatalf("Unable to connection to database: %v\n", err)
+		fmt.Println("Unable to connect to database: ", err)
 	}
-	defer storage.Close()
+	defer pool.Close()
 
-	rows, err := storage.Query(context.Background(), "select id,first_name,last_name from employee_accounting.staff s ")
-	if err != nil {
-		fmt.Println("11 ", err)
-	}
+	ratesHandler := rate.NewRates(pool)
 
-	defer rows.Close()
-	var users []user
-	var user1 user
-	for rows.Next() {
+	router := mux.NewRouter()
+	router.Handle("/rate/{date:[0-9]+}", ratesHandler).Methods("GET")
 
-		err = rows.Scan(&user1.Id, &user1.FirstName, &user1.LastName)
-		users = append(users, user1)
-		if err != nil {
-			fmt.Println("222 ", err)
-		}
-	}
-	for _, val := range users {
-		fmt.Println(val)
-	}
-	//	server := APIServer.New(storage, log, APIServer.NewConfig(cfg.servPort))
-	//	server.Start()
-
-	fmt.Println("happy end!")
+	http.ListenAndServe(os.Getenv("PORT"), router)
 }
