@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/ffo32167/currencyconverter/internal/APIServer/handlers/rate"
+	"github.com/ffo32167/currencyconverter/internal/APIServer/handlers/relation"
 )
 
 func main() {
@@ -19,10 +20,12 @@ func main() {
 	}
 	defer pool.Close()
 
-	ratesHandler := rate.NewRates(pool)
+	rateHandler := rate.NewRate(pool)
+	relationHandler := relation.NewRelation(pool)
 
 	router := mux.NewRouter()
-	router.Handle("/rate/{date:[0-9]+}", ratesHandler).Methods("GET")
+	router.Handle("/rate/{date:[0-9]+}", rateHandler).Methods("GET")
+	router.Handle("/relation/{date:[0-9]+}/{curr1:[A-Z]+}/{curr2:[A-Z]+}", relationHandler).Methods("GET")
 
 	http.ListenAndServe(os.Getenv("PORT"), router)
 }
