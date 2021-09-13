@@ -16,14 +16,14 @@ type Relation struct {
 	pool *pgxpool.Pool
 }
 
-func NewRelation(pool *pgxpool.Pool) Relation {
+func New(pool *pgxpool.Pool) Relation {
 	return Relation{pool: pool}
 }
 
 func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	data, err := postgres.Rate(r.pool, mux.Vars(req)["date"])
 	if err != nil {
-		// check error
+		// log error
 	}
 	curr1 := mux.Vars(req)["curr1"]
 	curr2 := mux.Vars(req)["curr2"]
@@ -44,6 +44,6 @@ func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	err = json.NewEncoder(res).Encode("exchange rate for " + curr1 + " to " + curr2 + " is " +
 		strconv.FormatFloat(relation, 'f', 6, 64))
 	if err != nil {
-		// check error
+		// log error
 	}
 }
