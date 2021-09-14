@@ -18,7 +18,7 @@ type Currencyfreaks struct {
 	currencies string
 }
 
-type CurrencyfreaksResponce struct {
+type CurrencyfreaksResponse struct {
 	Date  string            `json:"date"`
 	Base  string            `json:"base"`
 	Rates map[string]string `json:"rates"`
@@ -43,17 +43,23 @@ func (c Currencyfreaks) Rates() ([]postgres.StorageRate, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cant read body of CurrencyFreaks response: %w", err)
 	}
-	var cfr CurrencyfreaksResponce
+	var cfr CurrencyfreaksResponse
 	if err := json.Unmarshal([]byte(body), &cfr); err != nil {
 		return nil, fmt.Errorf("cant unmarshal data from CurrencyFreaks: %w", err)
 	}
+
 	var pgrates []postgres.StorageRate
+	date, err := time.Parse("2006-01-02 15:04:05+00", cfr.Date)
+	if err != nil {
+		return nil, fmt.Errorf("cant parse date from CurrencyFreaks: %w", err)
+	}
+	pgrates = append(pgrates, postgres.StorageRate{
+		RateDate: date,
+		CurrCode: cfr.Base,
+		Rate:     1,
+	})
 	for key, val := range cfr.Rates {
 		if strings.Contains(c.currencies, key) {
-			date, err := time.Parse("2006-01-02 15:04:05+00", cfr.Date)
-			if err != nil {
-				return nil, fmt.Errorf("cant parse time from CurrencyFreaks: %w", err)
-			}
 			rate, err := strconv.ParseFloat(val, 64)
 			if err != nil {
 				return nil, fmt.Errorf("cant parse rate value from CurrencyFreaks: %w", err)
