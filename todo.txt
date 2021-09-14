@@ -1,0 +1,7 @@
+1. сохранение курсов в бд
+2. map func CurrencyfreaksResponse to domain
+3. доделать cron
+4. zap
+5. выделить root пакет(storage, source, domain.Rate(маппинги в domain делать локально)
+    CurrencyfreaksResponse.DoDomain
+6. хранилище секретов(для общего развития)

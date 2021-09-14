@@ -16,6 +16,7 @@ import (
 type Currencyfreaks struct {
 	connStr    string
 	currencies string
+	client     http.Client
 }
 
 type CurrencyfreaksResponse struct {
@@ -25,14 +26,14 @@ type CurrencyfreaksResponse struct {
 }
 
 func New(connStr, currencies string) Currencyfreaks {
-	return Currencyfreaks{connStr: connStr, currencies: currencies}
+	return Currencyfreaks{
+		connStr:    connStr,
+		currencies: currencies,
+		client:     http.Client{Timeout: 1 * time.Second}}
 }
 
 func (c Currencyfreaks) Rates() ([]postgres.StorageRate, error) {
-	client := http.Client{
-		Timeout: 1 * time.Second,
-	}
-	resp, err := client.Get(c.connStr)
+	resp, err := c.client.Get(c.connStr)
 	if err != nil {
 		return nil, fmt.Errorf("cant connect with CurrencyFreaks: %w", err)
 	}
@@ -47,7 +48,7 @@ func (c Currencyfreaks) Rates() ([]postgres.StorageRate, error) {
 	if err := json.Unmarshal([]byte(body), &cfr); err != nil {
 		return nil, fmt.Errorf("cant unmarshal data from CurrencyFreaks: %w", err)
 	}
-
+	// map func CurrencyfreaksResponse to domain
 	var pgrates []postgres.StorageRate
 	date, err := time.Parse("2006-01-02 15:04:05+00", cfr.Date)
 	if err != nil {
