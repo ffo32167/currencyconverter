@@ -49,16 +49,16 @@ func (c Currencyfreaks) Rates() ([]internal.Rate, error) {
 		return nil, fmt.Errorf("cant unmarshal data from CurrencyFreaks: %w", err)
 	}
 
-	return cfr.toDomain(c.currencies)
+	return toDomain(cfr, c.currencies)
 }
 
-func (cfr CurrencyfreaksResponse) toDomain(currencies string) ([]internal.Rate, error) {
-	var pgrates []internal.Rate
+func toDomain(cfr CurrencyfreaksResponse, currencies string) ([]internal.Rate, error) {
+	var rates []internal.Rate
 	date, err := time.Parse("2006-01-02 15:04:05+00", cfr.Date)
 	if err != nil {
 		return nil, fmt.Errorf("cant parse date from CurrencyFreaks: %w", err)
 	}
-	pgrates = append(pgrates, internal.Rate{
+	rates = append(rates, internal.Rate{
 		RateDate: date,
 		CurrCode: cfr.Base,
 		Rate:     1,
@@ -69,8 +69,8 @@ func (cfr CurrencyfreaksResponse) toDomain(currencies string) ([]internal.Rate, 
 			if err != nil {
 				return nil, fmt.Errorf("cant parse rate value from CurrencyFreaks: %w", err)
 			}
-			pgrates = append(pgrates, internal.Rate{RateDate: date, CurrCode: key, Rate: rate})
+			rates = append(rates, internal.Rate{RateDate: date, CurrCode: key, Rate: rate})
 		}
 	}
-	return pgrates, nil
+	return rates, nil
 }

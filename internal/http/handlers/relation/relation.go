@@ -34,6 +34,7 @@ func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		// log error
 		json.NewEncoder(res).Encode(err)
 	}
+
 	err = json.NewEncoder(res).Encode(result)
 
 	if err != nil {

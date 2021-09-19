@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-type pgDb struct {
+type PgDb struct {
 	pool *pgxpool.Pool
 }
 
@@ -21,16 +21,16 @@ type PgRate struct {
 	Rate     float64   `json:"rate"`
 }
 
-func New() (pgDb, error) {
+func New() (PgDb, error) {
 	db, err := pgxpool.Connect(context.Background(), os.Getenv("PG_CONN_STR"))
 	if err != nil {
-		return pgDb{}, fmt.Errorf("Unable to connect to database: %w", err)
+		return PgDb{}, fmt.Errorf("Unable to connect to database: %w", err)
 	}
 	defer db.Close()
-	return pgDb{pool: db}, nil
+	return PgDb{pool: db}, nil
 }
 
-func (db pgDb) Rate(ctx context.Context, date string) ([]internal.Rate, error) {
+func (db PgDb) Rate(ctx context.Context, date string) ([]internal.Rate, error) {
 	rows, err := db.pool.Query(ctx,
 		"SELECT rate_date,curr_code,rate FROM employee_accounting.rates r WHERE rate_date = $1 ORDER BY curr_code",
 		date)
@@ -54,7 +54,7 @@ func (db pgDb) Rate(ctx context.Context, date string) ([]internal.Rate, error) {
 	return internalRates, nil
 }
 
-func (db pgDb) Create(ctx context.Context, internalRates []internal.Rate) error {
+func (db PgDb) Create(ctx context.Context, internalRates []internal.Rate) error {
 	/*данный кусок кода не особо нужен*/
 	pGrates, err := toPgRate(internalRates)
 	if err != nil {
