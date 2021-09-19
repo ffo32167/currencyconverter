@@ -7,21 +7,20 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4/pgxpool"
 
-	"github.com/ffo32167/currencyconverter/internal/postgres"
+	"github.com/ffo32167/currencyconverter/internal"
 )
 
 type Relation struct {
-	pool *pgxpool.Pool
+	storage internal.Storage
 }
 
-func New(pool *pgxpool.Pool) Relation {
-	return Relation{pool: pool}
+func New(storage internal.Storage) Relation {
+	return Relation{storage: storage}
 }
 
 func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	data, err := postgres.Rate(r.pool, mux.Vars(req)["date"])
+	data, err := r.storage.Rate(mux.Vars(req)["date"])
 	if err != nil {
 		// log error
 	}

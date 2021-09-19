@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ffo32167/currencyconverter/internal/postgres"
+	"github.com/ffo32167/currencyconverter/internal"
 )
 
 type Currencyfreaks struct {
@@ -32,7 +32,7 @@ func New(connStr, currencies string) Currencyfreaks {
 		client:     http.Client{Timeout: 1 * time.Second}}
 }
 
-func (c Currencyfreaks) Rates() ([]postgres.StorageRate, error) {
+func (c Currencyfreaks) Rates() ([]internal.Rate, error) {
 	resp, err := c.client.Get(c.connStr)
 	if err != nil {
 		return nil, fmt.Errorf("cant connect with CurrencyFreaks: %w", err)
@@ -48,24 +48,28 @@ func (c Currencyfreaks) Rates() ([]postgres.StorageRate, error) {
 	if err := json.Unmarshal([]byte(body), &cfr); err != nil {
 		return nil, fmt.Errorf("cant unmarshal data from CurrencyFreaks: %w", err)
 	}
-	// map func CurrencyfreaksResponse to domain
-	var pgrates []postgres.StorageRate
+
+	return cfr.toDomain(c.currencies)
+}
+
+func (cfr CurrencyfreaksResponse) toDomain(currencies string) ([]internal.Rate, error) {
+	var pgrates []internal.Rate
 	date, err := time.Parse("2006-01-02 15:04:05+00", cfr.Date)
 	if err != nil {
 		return nil, fmt.Errorf("cant parse date from CurrencyFreaks: %w", err)
 	}
-	pgrates = append(pgrates, postgres.StorageRate{
+	pgrates = append(pgrates, internal.Rate{
 		RateDate: date,
 		CurrCode: cfr.Base,
 		Rate:     1,
 	})
 	for key, val := range cfr.Rates {
-		if strings.Contains(c.currencies, key) {
+		if strings.Contains(currencies, key) {
 			rate, err := strconv.ParseFloat(val, 64)
 			if err != nil {
 				return nil, fmt.Errorf("cant parse rate value from CurrencyFreaks: %w", err)
 			}
-			pgrates = append(pgrates, postgres.StorageRate{RateDate: date, CurrCode: key, Rate: rate})
+			pgrates = append(pgrates, internal.Rate{RateDate: date, CurrCode: key, Rate: rate})
 		}
 	}
 	return pgrates, nil

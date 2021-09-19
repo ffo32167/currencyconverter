@@ -4,22 +4,20 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/ffo32167/currencyconverter/internal"
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v4/pgxpool"
-
-	"github.com/ffo32167/currencyconverter/internal/postgres"
 )
 
 type Rate struct {
-	pool *pgxpool.Pool
+	storage internal.Storage
 }
 
-func New(pool *pgxpool.Pool) Rate {
-	return Rate{pool: pool}
+func New(storage internal.Storage) Rate {
+	return Rate{storage: storage}
 }
 
 func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	data, err := postgres.Rate(r.pool, mux.Vars(req)["date"])
+	data, err := r.storage.Rate(mux.Vars(req)["date"])
 	if err != nil {
 		// log error
 	}
