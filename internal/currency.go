@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sort"
@@ -9,8 +10,8 @@ import (
 )
 
 type Storage interface {
-	Rate(date string) ([]Rate, error)
-	Create(rates []Rate) error
+	Rate(ctx context.Context, date string) ([]Rate, error)
+	Create(ctx context.Context, rates []Rate) error
 }
 
 type Rate struct {
@@ -19,8 +20,8 @@ type Rate struct {
 	Rate     float64
 }
 
-func Relation(storage Storage, date string, curr1, curr2 string) (string, error) {
-	data, err := storage.Rate(date)
+func Relation(ctx context.Context, storage Storage, date string, curr1, curr2 string) (string, error) {
+	data, err := storage.Rate(ctx, date)
 	if err != nil {
 		return "", fmt.Errorf("cant get rate from storage: %w", err)
 	}

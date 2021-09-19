@@ -1,8 +1,10 @@
 package relation
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -10,7 +12,8 @@ import (
 )
 
 type Relation struct {
-	storage internal.Storage
+	storage    internal.Storage
+	ctxTimeout int64
 }
 
 func New(storage internal.Storage) Relation {
@@ -18,11 +21,14 @@ func New(storage internal.Storage) Relation {
 }
 
 func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(r.ctxTimeout)*time.Millisecond)
+	defer cancel()
+
 	date := mux.Vars(req)["date"]
 	curr1 := mux.Vars(req)["curr1"]
 	curr2 := mux.Vars(req)["curr2"]
 
-	result, err := internal.Relation(r.storage, date, curr1, curr2)
+	result, err := internal.Relation(ctx, r.storage, date, curr1, curr2)
 
 	if err != nil {
 		// log error

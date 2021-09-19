@@ -1,15 +1,18 @@
 package rate
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/ffo32167/currencyconverter/internal"
 	"github.com/gorilla/mux"
 )
 
 type Rate struct {
-	storage internal.Storage
+	storage    internal.Storage
+	ctxTimeout int64
 }
 
 func New(storage internal.Storage) Rate {
@@ -17,7 +20,10 @@ func New(storage internal.Storage) Rate {
 }
 
 func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	data, err := r.storage.Rate(mux.Vars(req)["date"])
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(r.ctxTimeout)*time.Millisecond)
+	defer cancel()
+
+	data, err := r.storage.Rate(ctx, mux.Vars(req)["date"])
 	if err != nil {
 		// log error
 	}

@@ -25,11 +25,11 @@ type CurrencyfreaksResponse struct {
 	Rates map[string]string `json:"rates"`
 }
 
-func New(connStr, currencies string) Currencyfreaks {
+func New(connStr, currencies string, ctxTimeout int64) Currencyfreaks {
 	return Currencyfreaks{
 		connStr:    connStr,
 		currencies: currencies,
-		client:     http.Client{Timeout: 1 * time.Second}}
+		client:     http.Client{Timeout: time.Duration(ctxTimeout) * time.Second}}
 }
 
 func (c Currencyfreaks) Rates() ([]internal.Rate, error) {

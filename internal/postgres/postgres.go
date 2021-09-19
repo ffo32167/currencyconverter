@@ -30,8 +30,8 @@ func New() (pgDb, error) {
 	return pgDb{pool: db}, nil
 }
 
-func (db pgDb) Rate(date string) ([]internal.Rate, error) {
-	rows, err := db.pool.Query(context.Background(),
+func (db pgDb) Rate(ctx context.Context, date string) ([]internal.Rate, error) {
+	rows, err := db.pool.Query(ctx,
 		"SELECT rate_date,curr_code,rate FROM employee_accounting.rates r WHERE rate_date = $1 ORDER BY curr_code",
 		date)
 	if err != nil {
@@ -54,14 +54,14 @@ func (db pgDb) Rate(date string) ([]internal.Rate, error) {
 	return internalRates, nil
 }
 
-func (db pgDb) Create(internalRates []internal.Rate) error {
+func (db pgDb) Create(ctx context.Context, internalRates []internal.Rate) error {
 	/*данный кусок кода не особо нужен*/
 	pGrates, err := toPgRate(internalRates)
 	if err != nil {
 		return fmt.Errorf("unable to convert internal Rates to PG Rates: %w ", err)
 	} /**/
 	for _, v := range pGrates {
-		ct, err := db.pool.Exec(context.Background(),
+		ct, err := db.pool.Exec(ctx,
 			"INSERT INTO employee_accounting.rates(rate_date,curr_code,rate) VALUES($1,$2,$3)",
 			v.RateDate, v.CurrCode, v.Rate)
 		if err != nil {

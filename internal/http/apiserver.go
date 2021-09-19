@@ -12,10 +12,11 @@ import (
 type ApiServer struct {
 	storage internal.Storage
 	port    string
+	timeout int64
 }
 
-func New(storage internal.Storage, port string) ApiServer {
-	return ApiServer{storage: storage, port: port}
+func New(storage internal.Storage, port string, timeout int64) ApiServer {
+	return ApiServer{storage: storage, port: port, timeout: timeout}
 }
 
 func (as ApiServer) Run() error {
