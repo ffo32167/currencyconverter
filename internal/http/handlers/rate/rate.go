@@ -23,7 +23,7 @@ func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(r.ctxTimeout)*time.Millisecond)
 	defer cancel()
 
-	data, err := r.storage.Rate(ctx, mux.Vars(req)["date"])
+	data, err := internal.Rates(ctx, r.storage, mux.Vars(req)["date"])
 	if err != nil {
 		// log error
 	}

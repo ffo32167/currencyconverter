@@ -14,6 +14,10 @@ type Storage interface {
 	Create(ctx context.Context, rates []Rate) error
 }
 
+type Source interface {
+	Rates() ([]Rate, error)
+}
+
 type Rate struct {
 	RateDate time.Time
 	CurrCode string
@@ -41,4 +45,8 @@ func Relation(ctx context.Context, storage Storage, date string, curr1, curr2 st
 
 	return "exchange rate for " + curr1 + " to " + curr2 + " is " +
 		strconv.FormatFloat(relation, 'f', 6, 64), nil
+}
+
+func Rates(ctx context.Context, storage Storage, date string) ([]Rate, error) {
+	return storage.Rate(ctx, date)
 }
