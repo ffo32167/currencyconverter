@@ -49,6 +49,9 @@ func (c Currencyfreaks) Rates() ([]internal.Rate, error) {
 		return nil, fmt.Errorf("cant unmarshal data from CurrencyFreaks: %w", err)
 	}
 
+	if len(cfr.Rates) == 0 {
+		return nil, errors.New("cant get rates from currencyfreaks")
+	}
 	return toDomain(cfr, c.currencies)
 }
 

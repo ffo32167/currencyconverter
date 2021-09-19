@@ -38,23 +38,20 @@ type CbrResponse struct {
 
 func (c Cbr) Rates() ([]internal.Rate, error) {
 	decoder := xml.NewDecoder(strings.NewReader(str))
-
 	decoder.CharsetReader = charset.NewReaderLabel
 
 	rates := make([]CbrResponse, 0)
-
 	var date string
 	for {
 		token, err := decoder.Token()
 		if err == io.EOF {
 			break
 		}
-
 		if err != nil {
-			//			return nil, err
+			return nil, err
 		}
 		if token == nil {
-			//			return nil, errors.New("cant parse xml")
+			return nil, errors.New("cant parse xml")
 		}
 
 		switch tp := token.(type) {
@@ -69,6 +66,9 @@ func (c Cbr) Rates() ([]internal.Rate, error) {
 				date = tp.Attr[0].Value
 			}
 		}
+	}
+	if len(rates) == 0 {
+		return nil, errors.New("cant get rates from cbr")
 	}
 	return toDomain(date, rates)
 }
