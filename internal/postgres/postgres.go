@@ -75,7 +75,7 @@ func (db pgDb) Create(internalRates []internal.Rate) error {
 }
 
 func toDomain(rates []PgRate) ([]internal.Rate, error) {
-	result := make([]internal.Rate, len(rates))
+	result := make([]internal.Rate, len(rates), len(rates))
 	for i := range rates {
 		result[i].CurrCode = rates[i].CurrCode
 		result[i].Rate = rates[i].Rate
@@ -85,7 +85,7 @@ func toDomain(rates []PgRate) ([]internal.Rate, error) {
 }
 
 func toPgRate(rates []internal.Rate) ([]PgRate, error) {
-	result := make([]PgRate, len(rates))
+	result := make([]PgRate, len(rates), len(rates))
 	for i := range rates {
 		result[i].CurrCode = rates[i].CurrCode
 		result[i].Rate = rates[i].Rate
