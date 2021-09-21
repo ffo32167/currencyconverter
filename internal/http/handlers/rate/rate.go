@@ -22,8 +22,11 @@ func New(storage internal.Storage) Rate {
 func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(r.ctxTimeout)*time.Millisecond)
 	defer cancel()
-
-	data, err := internal.Rates(ctx, r.storage, mux.Vars(req)["date"])
+	dt, err := time.Parse("2006-01-02", mux.Vars(req)["date"])
+	if err != nil {
+		// log error
+	}
+	data, err := internal.Rates(ctx, r.storage, dt)
 	if err != nil {
 		// log error
 	}

@@ -15,7 +15,7 @@ func New(date time.Time, loc time.Location, fn func()) Cron {
 	return Cron{date: date, loc: loc, fn: fn}
 }
 
-func (c Cron) Action(f func()) error {
+func (c Cron) Action() error {
 	now := time.Now().In(&c.loc)
 	firstCallTime := time.Date(
 		now.Year(),
@@ -28,21 +28,18 @@ func (c Cron) Action(f func()) error {
 		&c.loc,
 	)
 
-	fmt.Println(firstCallTime)
-	if firstCallTime.Before(now) {
-		firstCallTime = firstCallTime.Add(time.Hour * 24)
-		fmt.Println(firstCallTime)
-	}
-
 	duration := firstCallTime.Sub(time.Now().In(&c.loc))
 
-	go func() {
+	fmt.Println("firstCallTime: 	", firstCallTime)
+	fmt.Println("Now: 		", time.Now().In(&c.loc))
+	fmt.Println("duration: 	", duration)
+
+	func() {
 		time.Sleep(duration)
 		for {
-			f()
-			time.Sleep(time.Hour * 24)
+			go c.fn()
+			time.Sleep(time.Second * 4)
 		}
 	}()
-
 	return nil
 }

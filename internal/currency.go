@@ -10,7 +10,7 @@ import (
 )
 
 type Storage interface {
-	Rate(ctx context.Context, date string) ([]Rate, error)
+	Rate(ctx context.Context, date time.Time) ([]Rate, error)
 	Create(ctx context.Context, rates []Rate) error
 }
 
@@ -24,7 +24,7 @@ type Rate struct {
 	Rate     float64
 }
 
-func Relation(ctx context.Context, storage Storage, date string, curr1, curr2 string) (string, error) {
+func Relation(ctx context.Context, storage Storage, date time.Time, curr1, curr2 string) (string, error) {
 	rates, err := storage.Rate(ctx, date)
 	if err != nil {
 		return "", fmt.Errorf("cant get rate from storage: %w", err)
@@ -47,6 +47,6 @@ func Relation(ctx context.Context, storage Storage, date string, curr1, curr2 st
 		strconv.FormatFloat(relation, 'f', 6, 64), nil
 }
 
-func Rates(ctx context.Context, storage Storage, date string) ([]Rate, error) {
+func Rates(ctx context.Context, storage Storage, date time.Time) ([]Rate, error) {
 	return storage.Rate(ctx, date)
 }

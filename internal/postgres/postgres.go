@@ -30,9 +30,9 @@ func New() (PgDb, error) {
 	return PgDb{pool: db}, nil
 }
 
-func (db PgDb) Rate(ctx context.Context, date string) ([]internal.Rate, error) {
+func (db PgDb) Rate(ctx context.Context, date time.Time) ([]internal.Rate, error) {
 	rows, err := db.pool.Query(ctx,
-		"SELECT rate_date,curr_code,rate FROM employee_accounting.rates r WHERE rate_date = $1 ORDER BY curr_code",
+		`SELECT rate_date,curr_code,rate FROM employee_accounting.rates r WHERE rate_date = $1 ORDER BY curr_code`,
 		date)
 	if err != nil {
 		return nil, fmt.Errorf("unable to execute select query: %w ", err)

@@ -28,7 +28,12 @@ func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	curr1 := mux.Vars(req)["curr1"]
 	curr2 := mux.Vars(req)["curr2"]
 
-	result, err := internal.Relation(ctx, r.storage, date, curr1, curr2)
+	dt, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		// log error
+	}
+
+	result, err := internal.Relation(ctx, r.storage, dt, curr1, curr2)
 
 	if err != nil {
 		// log error
