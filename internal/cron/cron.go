@@ -3,16 +3,26 @@ package cron
 import (
 	"fmt"
 	"time"
+
+	"github.com/ffo32167/currencyconverter/internal"
 )
 
 type Cron struct {
-	date time.Time
-	loc  time.Location
-	fn   func()
+	date    time.Time
+	loc     time.Location
+	fn      func(int64, internal.Source, internal.Storage) error
+	timeout int64
+	source  internal.Source
+	storage internal.Storage
 }
 
-func New(date time.Time, loc time.Location, fn func()) Cron {
-	return Cron{date: date, loc: loc, fn: fn}
+func New(date time.Time,
+	loc time.Location,
+	fn func(timeout int64, source internal.Source, storage internal.Storage) error,
+	timeout int64,
+	source internal.Source,
+	storage internal.Storage) Cron {
+	return Cron{date: date, loc: loc, fn: fn, timeout: timeout, source: source, storage: storage}
 }
 
 func (c Cron) Action() error {
@@ -37,8 +47,8 @@ func (c Cron) Action() error {
 	func() {
 		time.Sleep(duration)
 		for {
-			go c.fn()
-			time.Sleep(time.Second * 4)
+			go c.fn(c.timeout, c.source, c.storage)
+			time.Sleep(time.Second * 24)
 		}
 	}()
 	return nil

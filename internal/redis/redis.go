@@ -20,8 +20,7 @@ type RedisRate struct {
 	Rate     float64   `json:"rate"`
 }
 
-// "localhost:6379" "" 0
-func New(args ...string) (Redis, error) {
+func New(args []string) (Redis, error) {
 	db, err := strconv.Atoi(args[2])
 	if err != nil {
 		return Redis{}, fmt.Errorf("cant parse redis db parametr: %w", err)

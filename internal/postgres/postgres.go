@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/ffo32167/currencyconverter/internal"
@@ -21,8 +20,8 @@ type PgRate struct {
 	Rate     float64   `json:"rate"`
 }
 
-func New() (PgDb, error) {
-	db, err := pgxpool.Connect(context.Background(), os.Getenv("PG_CONN_STR"))
+func New(connStr string) (PgDb, error) {
+	db, err := pgxpool.Connect(context.Background(), connStr)
 	if err != nil {
 		return PgDb{}, fmt.Errorf("Unable to connect to database: %w", err)
 	}

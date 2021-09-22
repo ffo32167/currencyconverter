@@ -24,6 +24,19 @@ type Rate struct {
 	Rate     float64
 }
 
+func Sync(timeout int64, source Source, storage Storage) error {
+	ctx := context.Background()
+	rates, err := source.Rates()
+	if err != nil {
+		return err
+	}
+	err = storage.Create(ctx, rates)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func Relation(ctx context.Context, storage Storage, date time.Time, curr1, curr2 string) (string, error) {
 	rates, err := storage.Rate(ctx, date)
 	if err != nil {
