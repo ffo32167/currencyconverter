@@ -20,17 +20,17 @@ type PgRate struct {
 	Rate     float64   `json:"rate"`
 }
 
-func New(connStr string) (PgDb, error) {
+func New(ctx context.Context, connStr string) (PgDb, error) {
 	db, err := pgxpool.Connect(context.Background(), connStr)
 	if err != nil {
 		return PgDb{}, fmt.Errorf("Unable to connect to database: %w", err)
 	}
-	defer db.Close()
+	//	defer db.Close()
 	return PgDb{pool: db}, nil
 }
 
 func (db PgDb) Rate(ctx context.Context, date time.Time) ([]internal.Rate, error) {
-	rows, err := db.pool.Query(ctx,
+	rows, err := db.pool.Query(context.Background(),
 		`SELECT rate_date,curr_code,rate FROM employee_accounting.rates r WHERE rate_date = $1 ORDER BY curr_code`,
 		date)
 	if err != nil {

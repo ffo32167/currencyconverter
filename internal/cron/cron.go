@@ -10,16 +10,16 @@ import (
 type Cron struct {
 	date    time.Time
 	loc     time.Location
-	fn      func(int64, internal.Source, internal.Storage) error
-	timeout int64
+	fn      func(time.Duration, internal.Source, internal.Storage) error
+	timeout time.Duration
 	source  internal.Source
 	storage internal.Storage
 }
 
 func New(date time.Time,
 	loc time.Location,
-	fn func(timeout int64, source internal.Source, storage internal.Storage) error,
-	timeout int64,
+	fn func(timeout time.Duration, source internal.Source, storage internal.Storage) error,
+	timeout time.Duration,
 	source internal.Source,
 	storage internal.Storage) Cron {
 	return Cron{date: date, loc: loc, fn: fn, timeout: timeout, source: source, storage: storage}
@@ -48,6 +48,7 @@ func (c Cron) Action() error {
 		time.Sleep(duration)
 		for {
 			go c.fn(c.timeout, c.source, c.storage)
+			fmt.Println("cron call function")
 			time.Sleep(time.Second * 24)
 		}
 	}()

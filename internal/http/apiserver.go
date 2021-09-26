@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/ffo32167/currencyconverter/internal"
 	"github.com/ffo32167/currencyconverter/internal/http/handlers/rate"
@@ -12,15 +13,15 @@ import (
 type ApiServer struct {
 	storage internal.Storage
 	port    string
-	timeout int64
+	timeout time.Duration
 }
 
-func New(storage internal.Storage, port string, timeout int64) ApiServer {
+func New(storage internal.Storage, port string, timeout time.Duration) ApiServer {
 	return ApiServer{storage: storage, port: port, timeout: timeout}
 }
 
 func (as ApiServer) Run() error {
-	rateHandler := rate.New(as.storage)
+	rateHandler := rate.New(as.storage, as.timeout)
 	relationHandler := relation.New(as.storage)
 
 	router := mux.NewRouter()

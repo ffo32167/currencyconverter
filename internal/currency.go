@@ -24,7 +24,7 @@ type Rate struct {
 	Rate     float64
 }
 
-func Sync(timeout int64, source Source, storage Storage) error {
+func Sync(timeout time.Duration, source Source, storage Storage) error {
 	ctx := context.Background()
 	rates, err := source.Rates()
 	if err != nil {

@@ -3,6 +3,7 @@ package rate
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -12,20 +13,22 @@ import (
 
 type Rate struct {
 	storage    internal.Storage
-	ctxTimeout int64
+	ctxTimeout time.Duration
 }
 
-func New(storage internal.Storage) Rate {
-	return Rate{storage: storage}
+func New(storage internal.Storage, ctxTimeout time.Duration) Rate {
+	return Rate{storage: storage, ctxTimeout: ctxTimeout}
 }
 
 func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(r.ctxTimeout)*time.Millisecond)
+	fmt.Println("http rate")
+	ctx, cancel := context.WithTimeout(req.Context(), r.ctxTimeout*time.Second)
 	defer cancel()
-	dt, err := time.Parse("2006-01-02", mux.Vars(req)["date"])
+	dt, err := time.Parse("20060102", mux.Vars(req)["date"])
 	if err != nil {
 		// log error
 	}
+
 	data, err := internal.Rates(ctx, r.storage, dt)
 	if err != nil {
 		// log error
@@ -35,4 +38,5 @@ func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		// log error
 	}
+	fmt.Println("http rate")
 }

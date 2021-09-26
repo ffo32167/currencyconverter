@@ -13,7 +13,7 @@ import (
 
 type Relation struct {
 	storage    internal.Storage
-	ctxTimeout int64
+	ctxTimeout time.Duration
 }
 
 func New(storage internal.Storage) Relation {
@@ -21,7 +21,7 @@ func New(storage internal.Storage) Relation {
 }
 
 func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(r.ctxTimeout)*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), r.ctxTimeout)
 	defer cancel()
 
 	date := mux.Vars(req)["date"]
