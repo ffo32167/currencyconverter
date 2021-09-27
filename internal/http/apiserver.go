@@ -23,8 +23,10 @@ func New(storage internal.Storage, port string, timeout time.Duration, log *zap.
 }
 
 func (as ApiServer) Run() error {
-	rateHandler := rate.New(as.storage, as.timeout, as.log)
-	relationHandler := relation.New(as.storage, as.log)
+	cr := internal.CurrencyRepositoryNew(as.storage)
+
+	rateHandler := rate.New(cr, as.timeout, as.log)
+	relationHandler := relation.New(cr, as.log)
 
 	router := mux.NewRouter()
 	router.Handle("/rate/{date:[0-9]+}", rateHandler).Methods("GET")

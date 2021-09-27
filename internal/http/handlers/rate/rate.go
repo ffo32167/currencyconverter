@@ -13,13 +13,13 @@ import (
 )
 
 type Rate struct {
-	storage    internal.Storage
+	currRepo   internal.CurrencyRepository
 	ctxTimeout time.Duration
 	log        *zap.Logger
 }
 
-func New(storage internal.Storage, ctxTimeout time.Duration, log *zap.Logger) Rate {
-	return Rate{storage: storage, ctxTimeout: ctxTimeout, log: log}
+func New(currRepo internal.CurrencyRepository, ctxTimeout time.Duration, log *zap.Logger) Rate {
+	return Rate{currRepo: currRepo, ctxTimeout: ctxTimeout, log: log}
 }
 
 func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
@@ -31,7 +31,7 @@ func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		r.log.Error("rate handler time parse error:", zap.Error(err))
 	}
 
-	data, err := internal.Rates(ctx, r.storage, dt)
+	data, err := r.currRepo.Rates(ctx, dt)
 	if err != nil {
 		r.log.Error("rate handler rates error:", zap.Error(err))
 	}

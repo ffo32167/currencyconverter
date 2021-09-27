@@ -37,8 +37,16 @@ func Sync(timeout time.Duration, source Source, storage Storage) error {
 	return nil
 }
 
-func Relation(ctx context.Context, storage Storage, date time.Time, curr1, curr2 string) (string, error) {
-	rates, err := storage.Rate(ctx, date)
+type CurrencyRepository struct {
+	storage Storage
+}
+
+func CurrencyRepositoryNew(storage Storage) CurrencyRepository {
+	return CurrencyRepository{storage: storage}
+}
+
+func (cr CurrencyRepository) Relation(ctx context.Context, date time.Time, curr1, curr2 string) (string, error) {
+	rates, err := cr.storage.Rate(ctx, date)
 	if err != nil {
 		return "", fmt.Errorf("cant get rate from storage: %w", err)
 	}
@@ -60,6 +68,6 @@ func Relation(ctx context.Context, storage Storage, date time.Time, curr1, curr2
 		strconv.FormatFloat(relation, 'f', 6, 64), nil
 }
 
-func Rates(ctx context.Context, storage Storage, date time.Time) ([]Rate, error) {
-	return storage.Rate(ctx, date)
+func (cr CurrencyRepository) Rates(ctx context.Context, date time.Time) ([]Rate, error) {
+	return cr.storage.Rate(ctx, date)
 }

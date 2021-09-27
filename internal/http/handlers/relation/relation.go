@@ -13,13 +13,13 @@ import (
 )
 
 type Relation struct {
-	storage    internal.Storage
+	currRepo   internal.CurrencyRepository
 	ctxTimeout time.Duration
 	log        *zap.Logger
 }
 
-func New(storage internal.Storage, log *zap.Logger) Relation {
-	return Relation{storage: storage, log: log}
+func New(currRepo internal.CurrencyRepository, log *zap.Logger) Relation {
+	return Relation{currRepo: currRepo, log: log}
 }
 
 func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
@@ -35,7 +35,7 @@ func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		r.log.Error("rate handler time parse error:", zap.Error(err))
 	}
 
-	result, err := internal.Relation(ctx, r.storage, dt, curr1, curr2)
+	result, err := r.currRepo.Relation(ctx, dt, curr1, curr2)
 
 	if err != nil {
 		r.log.Error("rate handler relation error:", zap.Error(err))
