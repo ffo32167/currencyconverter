@@ -19,7 +19,9 @@ type Currencyfreaks struct {
 	client     http.Client
 }
 
-type CurrencyfreaksResponse struct {
+type CurrencyfreaksResponse []currFreaks
+
+type currFreaks struct {
 	Date  string            `json:"date"`
 	Base  string            `json:"base"`
 	Rates map[string]string `json:"rates"`
@@ -44,7 +46,7 @@ func (c Currencyfreaks) Rates() ([]internal.Rate, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cant read body of currencyfreaks response: %w", err)
 	}
-	var cfr CurrencyfreaksResponse
+	var cfr currFreaks
 	if err := json.Unmarshal([]byte(body), &cfr); err != nil {
 		return nil, fmt.Errorf("cant unmarshal data from currencyfreaks: %w", err)
 	}
@@ -52,10 +54,10 @@ func (c Currencyfreaks) Rates() ([]internal.Rate, error) {
 	if len(cfr.Rates) == 0 {
 		return nil, errors.New("cant get rates from currencyfreaks")
 	}
-	return toDomain(cfr, c.currencies)
+	return cfr.toDomain(c.currencies)
 }
 
-func toDomain(cfr CurrencyfreaksResponse, currencies string) ([]internal.Rate, error) {
+func (cfr currFreaks) toDomain(currencies string) ([]internal.Rate, error) {
 	var rates []internal.Rate
 	date, err := time.Parse("2006-01-02 15:04:05+00", cfr.Date)
 	if err != nil {
