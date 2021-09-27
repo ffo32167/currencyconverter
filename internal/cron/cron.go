@@ -1,10 +1,10 @@
 package cron
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/ffo32167/currencyconverter/internal"
+	"go.uber.org/zap"
 )
 
 type Cron struct {
@@ -14,6 +14,7 @@ type Cron struct {
 	timeout time.Duration
 	source  internal.Source
 	storage internal.Storage
+	log     *zap.Logger
 }
 
 func New(date time.Time,
@@ -21,8 +22,9 @@ func New(date time.Time,
 	fn func(timeout time.Duration, source internal.Source, storage internal.Storage) error,
 	timeout time.Duration,
 	source internal.Source,
-	storage internal.Storage) Cron {
-	return Cron{date: date, loc: loc, fn: fn, timeout: timeout, source: source, storage: storage}
+	storage internal.Storage,
+	log *zap.Logger) Cron {
+	return Cron{date: date, loc: loc, fn: fn, timeout: timeout, source: source, storage: storage, log: log}
 }
 
 func (c Cron) Action() error {
@@ -40,15 +42,15 @@ func (c Cron) Action() error {
 
 	duration := firstCallTime.Sub(time.Now().In(&c.loc))
 
-	fmt.Println("firstCallTime: 	", firstCallTime)
-	fmt.Println("Now: 		", time.Now().In(&c.loc))
-	fmt.Println("duration: 	", duration)
+	c.log.Info("firstCallTime", zap.Time("firstCallTime", firstCallTime))
+	c.log.Info("now: 		", zap.Time("now", time.Now().In(&c.loc)))
+	c.log.Info("duration: 	", zap.Duration("duration", duration))
 
 	func() {
 		time.Sleep(duration)
 		for {
 			go c.fn(c.timeout, c.source, c.storage)
-			fmt.Println("cron call function")
+			c.log.Info("cron call function every ", zap.Int("interval", 24))
 			time.Sleep(time.Second * 24)
 		}
 	}()

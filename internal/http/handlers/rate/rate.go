@@ -9,15 +9,17 @@ import (
 
 	"github.com/ffo32167/currencyconverter/internal"
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 )
 
 type Rate struct {
 	storage    internal.Storage
 	ctxTimeout time.Duration
+	log        *zap.Logger
 }
 
-func New(storage internal.Storage, ctxTimeout time.Duration) Rate {
-	return Rate{storage: storage, ctxTimeout: ctxTimeout}
+func New(storage internal.Storage, ctxTimeout time.Duration, log *zap.Logger) Rate {
+	return Rate{storage: storage, ctxTimeout: ctxTimeout, log: log}
 }
 
 func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
@@ -26,17 +28,17 @@ func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	defer cancel()
 	dt, err := time.Parse("20060102", mux.Vars(req)["date"])
 	if err != nil {
-		// log error
+		r.log.Error("rate handler time parse error:", zap.Error(err))
 	}
 
 	data, err := internal.Rates(ctx, r.storage, dt)
 	if err != nil {
-		// log error
+		r.log.Error("rate handler rates error:", zap.Error(err))
 	}
 
 	err = json.NewEncoder(res).Encode(data)
 	if err != nil {
-		// log error
+		r.log.Error("rate handler encoder error:", zap.Error(err))
 	}
 	fmt.Println("http rate")
 }

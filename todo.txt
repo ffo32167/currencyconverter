@@ -1,4 +1,4 @@
--- восстановить main
+++ восстановить main
 
 -+ доделать cron(пока отложим)
 -- zap внедряю
@@ -23,8 +23,8 @@
 
 -- переделать функцию toDomain как метод для типа CbrResponse
 
--- поднять redis в docker
+++ поднять redis в docker
 -- поднять redis в docker Compose
--- поднять PG в docker
+++ поднять PG в docker
 -- поднять PG в docker Compose
 -- докеризировать CurrencyConverter

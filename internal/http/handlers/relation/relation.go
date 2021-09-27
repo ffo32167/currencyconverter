@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 
 	"github.com/ffo32167/currencyconverter/internal"
 )
@@ -14,10 +15,11 @@ import (
 type Relation struct {
 	storage    internal.Storage
 	ctxTimeout time.Duration
+	log        *zap.Logger
 }
 
-func New(storage internal.Storage) Relation {
-	return Relation{storage: storage}
+func New(storage internal.Storage, log *zap.Logger) Relation {
+	return Relation{storage: storage, log: log}
 }
 
 func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
@@ -30,20 +32,19 @@ func (r Relation) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 	dt, err := time.Parse("2006-01-02", date)
 	if err != nil {
-		// log error
+		r.log.Error("rate handler time parse error:", zap.Error(err))
 	}
 
 	result, err := internal.Relation(ctx, r.storage, dt, curr1, curr2)
 
 	if err != nil {
-		// log error
+		r.log.Error("rate handler relation error:", zap.Error(err))
 		json.NewEncoder(res).Encode(err)
 	}
 
 	err = json.NewEncoder(res).Encode(result)
-
 	if err != nil {
-		// log error
+		r.log.Error("rate handler encoder error:", zap.Error(err))
 		json.NewEncoder(res).Encode(err)
 	}
 }
