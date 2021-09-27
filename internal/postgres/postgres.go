@@ -14,7 +14,9 @@ type PgDb struct {
 	pool *pgxpool.Pool
 }
 
-type PgRate struct {
+type PgRates []pgCurr
+
+type pgCurr struct {
 	RateDate time.Time `json:"date"`
 	CurrCode string    `json:"curr_code"`
 	Rate     float64   `json:"rate"`
@@ -37,8 +39,8 @@ func (db PgDb) Rate(ctx context.Context, date time.Time) ([]internal.Rate, error
 		return nil, fmt.Errorf("unable to execute select query: %w ", err)
 	}
 	defer rows.Close()
-	var rates []PgRate
-	var rate PgRate
+	var rates PgRates
+	var rate pgCurr
 	for rows.Next() {
 		err = rows.Scan(&rate.RateDate, &rate.CurrCode, &rate.Rate)
 		if err != nil {
@@ -46,7 +48,7 @@ func (db PgDb) Rate(ctx context.Context, date time.Time) ([]internal.Rate, error
 		}
 		rates = append(rates, rate)
 	}
-	internalRates, err := toDomain(rates)
+	internalRates, err := rates.toDomain()
 	if err != nil {
 		return internalRates, fmt.Errorf("unable to convert PG Rates to internal Rates: %w ", err)
 	}
@@ -54,12 +56,7 @@ func (db PgDb) Rate(ctx context.Context, date time.Time) ([]internal.Rate, error
 }
 
 func (db PgDb) Create(ctx context.Context, internalRates []internal.Rate) error {
-	/*данный кусок кода не особо нужен*/
-	pGrates, err := toPgRate(internalRates)
-	if err != nil {
-		return fmt.Errorf("unable to convert internal Rates to PG Rates: %w ", err)
-	} /**/
-	for _, v := range pGrates {
+	for _, v := range internalRates {
 		ct, err := db.pool.Exec(ctx,
 			"INSERT INTO employee_accounting.rates(rate_date,curr_code,rate) VALUES($1,$2,$3)",
 			v.RateDate, v.CurrCode, v.Rate)
@@ -73,18 +70,8 @@ func (db PgDb) Create(ctx context.Context, internalRates []internal.Rate) error 
 	return nil
 }
 
-func toDomain(rates []PgRate) ([]internal.Rate, error) {
+func (rates PgRates) toDomain() ([]internal.Rate, error) {
 	result := make([]internal.Rate, len(rates), len(rates))
-	for i := range rates {
-		result[i].CurrCode = rates[i].CurrCode
-		result[i].Rate = rates[i].Rate
-		result[i].RateDate = rates[i].RateDate
-	}
-	return result, nil
-}
-
-func toPgRate(rates []internal.Rate) ([]PgRate, error) {
-	result := make([]PgRate, len(rates), len(rates))
 	for i := range rates {
 		result[i].CurrCode = rates[i].CurrCode
 		result[i].Rate = rates[i].Rate
