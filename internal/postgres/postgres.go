@@ -33,7 +33,7 @@ func New(ctx context.Context, connStr string) (PgDb, error) {
 
 func (db PgDb) Rate(ctx context.Context, date time.Time) ([]internal.Rate, error) {
 	rows, err := db.pool.Query(context.Background(),
-		`SELECT rate_date,curr_code,rate FROM employee_accounting.rates r WHERE rate_date = $1 ORDER BY curr_code`,
+		`SELECT rate_date,curr_code,rate FROM rates.rates r WHERE rate_date = $1 ORDER BY curr_code`,
 		date)
 	if err != nil {
 		return nil, fmt.Errorf("unable to execute select query: %w ", err)
@@ -58,7 +58,7 @@ func (db PgDb) Rate(ctx context.Context, date time.Time) ([]internal.Rate, error
 func (db PgDb) Create(ctx context.Context, internalRates []internal.Rate) error {
 	for _, v := range internalRates {
 		ct, err := db.pool.Exec(ctx,
-			"INSERT INTO employee_accounting.rates(rate_date,curr_code,rate) VALUES($1,$2,$3)",
+			"INSERT INTO rates.rates(rate_date,curr_code,rate) VALUES($1,$2,$3)",
 			v.RateDate, v.CurrCode, v.Rate)
 		if err != nil {
 			return fmt.Errorf("unable to execute insert query: %w ", err)
