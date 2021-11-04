@@ -3,7 +3,6 @@ FROM golang:latest
 WORKDIR /app
 
 COPY ./ /app
-#ENV PG_CONN_STR="host=postgres user=postgres password=pgpwd host=127.0.0.1:5432 dbname=postgres sslmode=disable"
 ENV PG_CONN_STR="postgres://postgres:pgpwd@postgres:5432/postgres?sslmode=disable"
 ENV PORT=":8080"
 ENV CURRENCYFREAKS_CONN_STR="https://api.currencyfreaks.com/latest?apikey=f76751a9d86144a180db32b5de1a69a2&format=json"
