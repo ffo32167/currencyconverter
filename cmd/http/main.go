@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/ffo32167/currencyconverter/internal"
-	"github.com/ffo32167/currencyconverter/internal/cbr"
 	"github.com/ffo32167/currencyconverter/internal/cron"
+	"github.com/ffo32167/currencyconverter/internal/currencyfreaks"
 	"github.com/ffo32167/currencyconverter/internal/http"
 	"github.com/ffo32167/currencyconverter/internal/postgres"
 	"go.uber.org/zap"
@@ -34,10 +35,16 @@ func main() {
 		log.Error("CTX_TIMEOUT error", zap.Error(err))
 		return
 	}
-	source := cbr.New(
-		os.Getenv("CBR_CONN_STR"),
+	/*
+		source := cbr.New(
+			os.Getenv("CBR_CONN_STR"),
+			os.Getenv("CURRENCIES"),
+			ctxTimeout)
+	*/
+	source := currencyfreaks.New(
+		os.Getenv("CURRENCYFREAKS_CONN_STR"),
 		os.Getenv("CURRENCIES"),
-		ctxTimeout)
+		ctxTimeoutValue)
 
 	rates, err := source.Rates()
 	if err != nil {
@@ -56,6 +63,8 @@ func main() {
 	go c.Action()
 
 	apiServer := http.New(storage, os.Getenv("PORT"), ctxTimeout, log)
-	apiServer.Run()
-
+	err = apiServer.Run()
+	if err != nil {
+		log.Error("cant start api server:", zap.Error(err))
+	}
 }

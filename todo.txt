@@ -28,6 +28,8 @@
 ++ в домене, для функций relation и rates создать структуру CurrencyRepository и привязать к ней эти методы.
     для дальнейшего расширения
 
+-- Graceful shutdown    
+
 ++ переделать функцию toDomain как метод для типа CbrResponse
 
 ++ поднять redis в docker
