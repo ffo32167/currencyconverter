@@ -25,7 +25,7 @@ type pgCurr struct {
 func New(ctx context.Context, connStr string) (PgDb, error) {
 	db, err := pgxpool.Connect(context.Background(), connStr)
 	if err != nil {
-		return PgDb{}, fmt.Errorf("unable to connect to database: %w", err)
+		return PgDb{}, fmt.Errorf("Unable to connect to database: %w", err)
 	}
 	//	defer db.Close()
 	return PgDb{pool: db}, nil

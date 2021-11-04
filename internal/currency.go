@@ -41,7 +41,7 @@ type CurrencyRepository struct {
 	storage Storage
 }
 
-func CurrencyRepositoryNew(storage Storage) CurrencyRepository {
+func NewCurrencyRepository(storage Storage) CurrencyRepository {
 	return CurrencyRepository{storage: storage}
 }
 

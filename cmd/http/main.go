@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	//	httpp "net/http"
 	"os"
 	"strconv"
 	"time"
@@ -18,20 +17,6 @@ import (
 )
 
 func main() {
-
-	/*	resp, err := httpp.Get("https://httpbin.org/get")
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		fmt.Println(string(body))
-		os.Exit(0)
-	*/
 	log, err := zap.NewProduction()
 	if err != nil {
 		fmt.Println(fmt.Errorf("cant start logger: %w", err))

@@ -23,7 +23,7 @@ func New(storage internal.Storage, port string, timeout time.Duration, log *zap.
 }
 
 func (as ApiServer) Run() error {
-	cr := internal.CurrencyRepositoryNew(as.storage)
+	cr := internal.NewCurrencyRepository(as.storage)
 
 	rateHandler := rate.New(cr, as.timeout, as.log)
 	relationHandler := relation.New(cr, as.log)
