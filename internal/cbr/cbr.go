@@ -67,15 +67,14 @@ func (c Cbr) Rates() ([]internal.Rate, error) {
 
 		switch tp := token.(type) {
 		case xml.StartElement:
+
 			if tp.Name.Local == "Valute" {
 				var curr cbrCurr
-				defer func() {
-					err = decoder.DecodeElement(&curr, &tp)
-					if err != nil {
-						err = fmt.Errorf("cant decode cbr element: %w", err)
-					}
-				}()
 
+				err = decoder.DecodeElement(&curr, &tp)
+				if err != nil {
+					return nil, err
+				}
 				if strings.Contains(c.currencies, curr.Currency) {
 					rates = append(rates, curr)
 				}
@@ -87,6 +86,7 @@ func (c Cbr) Rates() ([]internal.Rate, error) {
 	if len(rates) == 0 {
 		return nil, errors.New("cant get rates from cbr")
 	}
+
 	return rates.toDomain(date)
 }
 
@@ -107,7 +107,7 @@ func (cbr cbrResponse) toDomain(date string) ([]internal.Rate, error) {
 
 		rate, err := strconv.ParseFloat(dotSeparatedString, 64)
 		if err != nil {
-			return nil, errors.New("cant parse rate")
+			return nil, errors.New("cant parse rate for " + dotSeparatedString)
 		}
 		nominal, err := strconv.ParseFloat(v.Nominal, 64)
 		if err != nil {

@@ -3,16 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
-
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ffo32167/currencyconverter/internal"
+	"github.com/ffo32167/currencyconverter/internal/cbr"
 	"github.com/ffo32167/currencyconverter/internal/cron"
 	"github.com/ffo32167/currencyconverter/internal/currencyfreaks"
 	"github.com/ffo32167/currencyconverter/internal/http"
 	"github.com/ffo32167/currencyconverter/internal/postgres"
+	"github.com/ffo32167/currencyconverter/internal/redis"
 	"go.uber.org/zap"
 )
 
@@ -35,16 +37,19 @@ func main() {
 	}
 	ctxTimeout := time.Duration(ctxTimeoutValue)
 
-	/*
-		source := cbr.New(
+	var source internal.Source
+	switch os.Getenv("SOURCE") {
+	case "cbr":
+		source = cbr.New(
 			os.Getenv("CBR_CONN_STR"),
 			os.Getenv("CURRENCIES"),
 			ctxTimeout)
-	*/
-	source := currencyfreaks.New(
-		os.Getenv("CURRENCYFREAKS_CONN_STR"),
-		os.Getenv("CURRENCIES"),
-		ctxTimeoutValue)
+	default:
+		source = currencyfreaks.New(
+			os.Getenv("CURRENCYFREAKS_CONN_STR"),
+			os.Getenv("CURRENCIES"),
+			ctxTimeoutValue)
+	}
 
 	rates, err := source.Rates()
 	if err != nil {
@@ -52,10 +57,19 @@ func main() {
 	}
 	fmt.Println(rates)
 
-	storage, err := postgres.New(context.Background(), os.Getenv("PG_CONN_STR"))
-	if err != nil {
-		log.Error("pgCreate: ", zap.Error(err))
+	var storage internal.Storage
+	switch os.Getenv("STORAGE") {
+	case "redis":
+		storage, err = redis.New(
+			strings.Split(os.Getenv("REDIS_CONN_STR"), ","))
+	default:
+		storage, err = postgres.New(context.Background(), os.Getenv("PG_CONN_STR"))
 	}
+	if err != nil {
+		log.Error("storage create error: ", zap.Error(err))
+	}
+
+	storage.Create(context.TODO(), rates)
 
 	t := time.Now().Add(10 * time.Second)
 	loc, _ := time.LoadLocation("Europe/Moscow")
@@ -67,4 +81,5 @@ func main() {
 	if err != nil {
 		log.Error("cant start api server:", zap.Error(err))
 	}
+
 }
