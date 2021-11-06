@@ -29,12 +29,12 @@ func main() {
 	}()
 
 	ctxTimeoutValue, err := strconv.ParseInt(os.Getenv("CTX_TIMEOUT"), 10, 64)
-
-	ctxTimeout := time.Duration(ctxTimeoutValue)
 	if err != nil {
-		log.Error("CTX_TIMEOUT error", zap.Error(err))
+		log.Error("cant parse env CTX_TIMEOUT:", zap.Error(err))
 		return
 	}
+	ctxTimeout := time.Duration(ctxTimeoutValue)
+
 	/*
 		source := cbr.New(
 			os.Getenv("CBR_CONN_STR"),

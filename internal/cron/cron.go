@@ -27,7 +27,7 @@ func New(date time.Time,
 	return Cron{date: date, loc: loc, fn: fn, timeout: timeout, source: source, storage: storage, log: log}
 }
 
-func (c Cron) Action() error {
+func (c Cron) Action() {
 	now := time.Now().In(&c.loc)
 	firstCallTime := time.Date(
 		now.Year(),
@@ -46,13 +46,15 @@ func (c Cron) Action() error {
 	c.log.Info("now: 		", zap.Time("now", time.Now().In(&c.loc)))
 	c.log.Info("duration: 	", zap.Duration("duration", duration))
 
-	func() {
-		time.Sleep(duration)
-		for {
-			go c.fn(c.timeout, c.source, c.storage)
-			c.log.Info("cron call function every ", zap.Int("interval", 24))
-			time.Sleep(time.Second * 24)
-		}
-	}()
-	return nil
+	time.Sleep(duration)
+	for {
+		go func() {
+			err := c.fn(c.timeout, c.source, c.storage)
+			if err != nil {
+				c.log.Error("cron call error: ", zap.Error(err))
+			}
+		}()
+		c.log.Info("cron call function every ", zap.Int("interval", 24))
+		time.Sleep(time.Second * 24)
+	}
 }
