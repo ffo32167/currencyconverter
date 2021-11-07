@@ -48,7 +48,7 @@ func main() {
 		source = currencyfreaks.New(
 			os.Getenv("CURRENCYFREAKS_CONN_STR"),
 			os.Getenv("CURRENCIES"),
-			ctxTimeoutValue)
+			ctxTimeout)
 	}
 
 	rates, err := source.Rates()
