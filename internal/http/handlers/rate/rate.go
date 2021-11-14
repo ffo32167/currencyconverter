@@ -3,7 +3,6 @@ package rate
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -23,7 +22,6 @@ func New(currRepo internal.CurrencyRepository, ctxTimeout time.Duration, log *za
 }
 
 func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("http rate")
 	ctx, cancel := context.WithTimeout(req.Context(), r.ctxTimeout*time.Second)
 	defer cancel()
 	dt, err := time.Parse("20060102", mux.Vars(req)["date"])
@@ -40,5 +38,4 @@ func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		r.log.Error("rate handler encoder error:", zap.Error(err))
 	}
-	fmt.Println("http rate")
 }

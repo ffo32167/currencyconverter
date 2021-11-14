@@ -32,7 +32,7 @@ func main() {
 
 	ctxTimeoutValue, err := strconv.ParseInt(os.Getenv("CTX_TIMEOUT"), 10, 64)
 	if err != nil {
-		log.Error("cant parse env CTX_TIMEOUT:", zap.Error(err))
+		log.Error("cant parse env ctx timeout:", zap.Error(err))
 		return
 	}
 	ctxTimeout := time.Duration(ctxTimeoutValue)
@@ -73,7 +73,16 @@ func main() {
 
 	t := time.Now().Add(10 * time.Second)
 	loc, _ := time.LoadLocation("Europe/Moscow")
-	c := cron.New(t, *loc, internal.Sync, ctxTimeout, source, storage, log)
+	if err != nil {
+		log.Error("cant parse cron location")
+	}
+
+	interval, err := strconv.ParseInt(os.Getenv("CRON_INTERVAL"), 10, 64)
+	if err != nil {
+		log.Error("cant parse env cron interval:", zap.Error(err))
+		return
+	}
+	c := cron.New(t, *loc, internal.Sync, ctxTimeout, source, storage, log, interval)
 	go c.Action()
 
 	apiServer := http.New(storage, os.Getenv("PORT"), ctxTimeout, log)

@@ -8,13 +8,14 @@ import (
 )
 
 type Cron struct {
-	date    time.Time
-	loc     time.Location
-	fn      func(time.Duration, internal.Source, internal.Storage) error
-	timeout time.Duration
-	source  internal.Source
-	storage internal.Storage
-	log     *zap.Logger
+	date     time.Time
+	loc      time.Location
+	fn       func(time.Duration, internal.Source, internal.Storage) error
+	timeout  time.Duration
+	source   internal.Source
+	storage  internal.Storage
+	log      *zap.Logger
+	interval int64
 }
 
 func New(date time.Time,
@@ -23,8 +24,18 @@ func New(date time.Time,
 	timeout time.Duration,
 	source internal.Source,
 	storage internal.Storage,
-	log *zap.Logger) Cron {
-	return Cron{date: date, loc: loc, fn: fn, timeout: timeout, source: source, storage: storage, log: log}
+	log *zap.Logger,
+	interval int64) Cron {
+	return Cron{
+		date:     date,
+		loc:      loc,
+		fn:       fn,
+		timeout:  timeout,
+		source:   source,
+		storage:  storage,
+		log:      log,
+		interval: interval,
+	}
 }
 
 func (c Cron) Action() {
@@ -54,7 +65,7 @@ func (c Cron) Action() {
 				c.log.Error("cron call error: ", zap.Error(err))
 			}
 		}()
-		c.log.Info("cron call function every ", zap.Int("interval", 24))
-		time.Sleep(time.Second * 24)
+		c.log.Info("cron call function every ", zap.Int64("interval", c.interval))
+		time.Sleep(time.Second * time.Duration(c.interval))
 	}
 }
