@@ -1,7 +1,6 @@
 package rate
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -22,14 +21,12 @@ func New(currRepo internal.CurrencyRepository, ctxTimeout time.Duration, log *za
 }
 
 func (r Rate) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	ctx, cancel := context.WithTimeout(req.Context(), r.ctxTimeout*time.Second)
-	defer cancel()
 	dt, err := time.Parse("20060102", mux.Vars(req)["date"])
 	if err != nil {
 		r.log.Error("rate handler time parse error:", zap.Error(err))
 	}
 
-	data, err := r.currRepo.Rates(ctx, dt)
+	data, err := r.currRepo.Rates(req.Context(), dt)
 	if err != nil {
 		r.log.Error("rate handler rates error:", zap.Error(err))
 	}
